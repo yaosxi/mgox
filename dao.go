@@ -451,7 +451,7 @@ func (q *Query) Result(result interface{}) error {
 		if IsSlice(result) {
 			panic("result argument can't be a slice address")
 		}
-		log4go.Debug("will query by id %s", q.queries[0])
+		log4go.Debug("query id: %s", q.queries[0])
 		if str, ok := q.queries[0].(string); ok {
 			mgoQuery = c.FindId(bson.ObjectIdHex(str))
 		} else {
@@ -459,6 +459,7 @@ func (q *Query) Result(result interface{}) error {
 		}
 	} else {
 		selector = q.dao.getM(q.queries...)
+		log4go.Debug("queries: %s", selector)
 		mgoQuery = c.Find(selector)
 	}
 
@@ -527,21 +528,22 @@ func (q *Query) Count(collectionName interface{}) (int, error) {
 	c := q.dao.db.C(getCollectionName(collectionName))
 	var mgoQuery *mgo.Query
 	if q.dao.isID(q.queries...) {
+		log4go.Debug("query id: %s", q.queries[0])
 		if str, ok := q.queries[0].(string); ok {
 			mgoQuery = c.FindId(bson.ObjectIdHex(str))
 		} else {
 			mgoQuery = c.FindId(q.queries[0])
 		}
 	} else {
-		mgoQuery = c.Find(q.dao.getM(q.queries...))
+		selector := q.dao.getM(q.queries...)
+		log4go.Debug("queries: %s", selector)
+		mgoQuery = c.Find(selector)
 	}
 	var n int
 	n, q.dao.Err = mgoQuery.Count()
 	log4go.Debug(n)
 	return n, q.dao.Err
 }
-
-
 
 func (q *Query) First(result interface{}) error {
 	log4go.Debug("first")

@@ -28,8 +28,9 @@ func GetDatabase() (*mgo.Database, error) {
 		if loginErr != nil {
 			return database, nil
 		}
-		log4go.Debug("login successfully")
 	}
-	log4go.Debug("Connected DB server successfully")
+
+	log4go.Debug("Opened DB connnection successfully")
+
 	return database, nil
 }

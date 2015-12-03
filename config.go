@@ -99,7 +99,7 @@ func (c PropertyReader) Read(key string) string {
 
 func init()  {
 	db := new(PropertyReader)
-	db.init("mgox.properties")
+	db.init("conf/mgox.properties")
 	log4go.Debug(db.m)
 	DBConfig.host = db.m["host"]
 	DBConfig.database = db.m["database"]
