@@ -14,6 +14,7 @@ func GetDatabase() (*mgo.Database, error) {
 
 	if dbSession == nil {
 		var err error
+		log4go.Info("Dial to %s", DBConfig.host)
 		dbSession, err = mgo.Dial(DBConfig.host)
 		if err != nil {
 			return nil, err
@@ -21,6 +22,7 @@ func GetDatabase() (*mgo.Database, error) {
 		dbSession.SetMode(mgo.Strong, true)
 	}
 
+	log4go.Finest("Try to open DB connnection: %s", DBConfig.database)
 	database := dbSession.Clone().DB(DBConfig.database)
 
 	if DBConfig.username != "" {
@@ -30,7 +32,7 @@ func GetDatabase() (*mgo.Database, error) {
 		}
 	}
 
-	log4go.Debug("Opened DB connnection successfully")
+	log4go.Finest("Opened DB connnection successfully")
 
 	return database, nil
 }

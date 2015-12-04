@@ -9,6 +9,7 @@ import (
 	"time"
 	"github.com/alecthomas/log4go"
 	"fmt"
+	"bytes"
 )
 
 
@@ -107,7 +108,7 @@ func (d *dao) Insert(docs... interface{}) error {
 
 		if mType.Kind() == reflect.Struct && mValue.IsValid() {
 			field := mValue.FieldByName("Id")
-			if field.IsValid() && field.Interface() != nil && field.CanSet() {
+			if field.IsValid() && field.String() == "" && field.CanSet() {
 				field.Set(reflect.ValueOf(bson.NewObjectId()))
 			}
 			now := reflect.ValueOf(time.Now())
@@ -314,7 +315,8 @@ func (d *dao) update(operator string, collectionName interface{}, selector inter
 		defer d.Close()
 	}
 
-	c := d.db.C(getCollectionName(collectionName))
+	_collectionName := getCollectionName(collectionName)
+	c := d.db.C(_collectionName)
 
 	var id bson.ObjectId
 	if strId, ok := selector.(string); ok {
@@ -338,20 +340,21 @@ func (d *dao) update(operator string, collectionName interface{}, selector inter
 		return d.Err
 	}
 
-	log4go.Debug(operator)
-
 	if isStruct {
 		if id != "" {
+			log4go.Debug(fmt.Sprintf("[%s]collection=%s,id=%s,struct=%s", operator, _collectionName, id, updates[0]))
 			d.Err = c.UpdateId(id, updates[0])
-			log4go.Debug(fmt.Sprintf("id=%s", id))
 		} else {
+			log4go.Debug(fmt.Sprintf("[%s]collection=%s,selector=%s,struct=%s", operator, _collectionName, selector, updates[0]))
 			_, d.Err = c.UpdateAll(selector, updates[0])
 		}
 	} else {
 		if id != "" {
-			d.Err = c.UpdateId(id, update)
 			log4go.Debug(fmt.Sprintf("id=%s", id))
+			log4go.Debug(fmt.Sprintf("[%s]collection=%s,id=%s,update=%s", operator, _collectionName, id, update))
+			d.Err = c.UpdateId(id, update)
 		} else {
+			log4go.Debug(fmt.Sprintf("[%s]collection=%s,selector=%s,struct=%s", operator, _collectionName, selector, update))
 			_, d.Err = c.UpdateAll(selector, update)
 		}
 	}
@@ -447,11 +450,14 @@ func (q *Query) Result(result interface{}) error {
 	var selector bson.M
 	var mgoQuery *mgo.Query
 
+	var log bytes.Buffer
+	log.WriteString("[query]")
+
 	if q.dao.isID(q.queries...) {
 		if IsSlice(result) {
 			panic("result argument can't be a slice address")
 		}
-		log4go.Debug("query id: %s", q.queries[0])
+		log.WriteString(fmt.Sprintf("id=%s", q.queries[0]))
 		if str, ok := q.queries[0].(string); ok {
 			mgoQuery = c.FindId(bson.ObjectIdHex(str))
 		} else {
@@ -460,14 +466,17 @@ func (q *Query) Result(result interface{}) error {
 	} else {
 		selector = q.dao.getM(q.queries...)
 		log4go.Debug("queries: %s", selector)
+		log.WriteString(fmt.Sprintf("selector=%s", selector))
 		mgoQuery = c.Find(selector)
 	}
 
 	if q.sorts != nil && len(q.sorts) > 0 {
 		mgoQuery = mgoQuery.Sort(q.sorts...)
+		log.WriteString(fmt.Sprintf(",sort=%s", q.sorts))
 	}
 
 	if q.page != nil {
+		log.WriteString(fmt.Sprintf(",page=%s", q.page))
 		q.page.Total, q.dao.Err = mgoQuery.Count()
 		if q.dao.Err != nil {
 			return q.dao.Err
@@ -480,6 +489,7 @@ func (q *Query) Result(result interface{}) error {
 	}
 
 	if q.distinct != "" {
+		log.WriteString(fmt.Sprintf(",distinct=%s", q.distinct))
 		q.dao.Err = mgoQuery.Distinct(q.distinct, result)
 	} else if IsSlice(result) {
 		q.dao.Err = mgoQuery.All(result)
@@ -488,7 +498,6 @@ func (q *Query) Result(result interface{}) error {
 			if len > 0 {
 				q.page.Next = q.page.Cursor + len
 			}
-			log4go.Debug("page: %v", q.page)
 		}
 	} else {
 		q.dao.Err = mgoQuery.One(result)
@@ -498,14 +507,16 @@ func (q *Query) Result(result interface{}) error {
 				len = 0
 			}
 			q.page.Next = q.page.Cursor + len
-			log4go.Debug("page: %v", q.page)
-
 		}
 	}
 
 	if q.ignoreNFE && q.dao.Err == mgo.ErrNotFound {
 		q.dao.Err = nil
 	}
+
+	log4go.Debug(log)
+	//log4go.Trace("page: %s", q.page)
+	//log4go.Trace("result: %v", result)
 
 	return q.dao.Err
 }
