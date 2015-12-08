@@ -10,6 +10,7 @@ import (
 	"github.com/alecthomas/log4go"
 	"fmt"
 	"bytes"
+	"encoding/json"
 )
 
 
@@ -30,7 +31,6 @@ func getCollectionName(doc interface{}) string {
 	if collectionName == "" && mType.Name() != "" {
 		collectionName = strings.ToLower(mType.Name())
 	}
-	log4go.Debug("Collection: " + collectionName)
 	return collectionName
 }
 
@@ -451,13 +451,13 @@ func (q *Query) Result(result interface{}) error {
 	var mgoQuery *mgo.Query
 
 	var log bytes.Buffer
-	log.WriteString("[query]")
+	log.WriteString(fmt.Sprintf("[query]collection=%s", collectionName))
 
 	if q.dao.isID(q.queries...) {
 		if IsSlice(result) {
 			panic("result argument can't be a slice address")
 		}
-		log.WriteString(fmt.Sprintf("id=%s", q.queries[0]))
+		log.WriteString(fmt.Sprintf(",id=%s", q.queries[0]))
 		if str, ok := q.queries[0].(string); ok {
 			mgoQuery = c.FindId(bson.ObjectIdHex(str))
 		} else {
@@ -465,8 +465,7 @@ func (q *Query) Result(result interface{}) error {
 		}
 	} else {
 		selector = q.dao.getM(q.queries...)
-		log4go.Debug("queries: %s", selector)
-		log.WriteString(fmt.Sprintf("selector=%s", selector))
+		log.WriteString(fmt.Sprintf(",selector=%s", selector))
 		mgoQuery = c.Find(selector)
 	}
 
@@ -514,13 +513,17 @@ func (q *Query) Result(result interface{}) error {
 		q.dao.Err = nil
 	}
 
-	log4go.Debug(log)
-	//log4go.Trace("page: %s", q.page)
-	//log4go.Trace("result: %v", result)
+	log4go.Trace(log.String())
+
+	if q.page != nil {
+		b, _ := json.Marshal(q.page)
+		log4go.Trace("page: %s", string(b))
+	}
+	b, _ := json.Marshal(result)
+	log4go.Trace("result: %s", string(b))
 
 	return q.dao.Err
 }
-
 
 func (q *Query) Count(collectionName interface{}) (int, error) {
 	if q.dao.Err != nil {
