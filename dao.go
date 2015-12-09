@@ -413,7 +413,9 @@ func (q *Query) IgnoreNFE() *Query {
 }
 
 func (q *Query) Page(page *Page) *Query {
-	q.page = page
+	if page.Cursor >= 0 {
+		q.page = page
+	}
 	return q
 }
 
