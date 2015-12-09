@@ -14,19 +14,19 @@ func GetDatabase() (*mgo.Database, error) {
 
 	if dbSession == nil {
 		var err error
-		log4go.Info("Dial to %s", DBConfig.host)
-		dbSession, err = mgo.Dial(DBConfig.host)
+		log4go.Info("Dial to %s", DBConfig.Host)
+		dbSession, err = mgo.Dial(DBConfig.Host)
 		if err != nil {
 			return nil, err
 		}
 		dbSession.SetMode(mgo.Strong, true)
 	}
 
-	log4go.Finest("Try to open DB connnection: %s", DBConfig.database)
-	database := dbSession.Clone().DB(DBConfig.database)
+	log4go.Finest("Try to open DB connnection: %s", DBConfig.Database)
+	database := dbSession.Clone().DB(DBConfig.Database)
 
-	if DBConfig.username != "" {
-		loginErr := database.Login(DBConfig.username, DBConfig.password)
+	if DBConfig.Username != "" {
+		loginErr := database.Login(DBConfig.Username, DBConfig.Password)
 		if loginErr != nil {
 			return database, nil
 		}

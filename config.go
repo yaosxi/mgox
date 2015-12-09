@@ -10,10 +10,10 @@ import (
 
 
 type dbconfig struct {
-	host string
-	database string
-	username string
-	password string
+	Host     string
+	Database string
+	Username string
+	Password string
 }
 
 var DBConfig dbconfig
@@ -101,8 +101,8 @@ func init()  {
 	db := new(PropertyReader)
 	db.init("conf/mgox.properties")
 	log4go.Debug(db.m)
-	DBConfig.host = db.m["host"]
-	DBConfig.database = db.m["database"]
-	DBConfig.username = db.m["username"]
-	DBConfig.password = db.m["password"]
+	DBConfig.Host = db.m["host"]
+	DBConfig.Database = db.m["database"]
+	DBConfig.Username = db.m["username"]
+	DBConfig.Password = db.m["password"]
 }
