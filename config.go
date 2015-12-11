@@ -1,13 +1,12 @@
 package mgox
 
 import (
-	"strings"
-	"os"
 	"bufio"
-	"io"
 	"github.com/alecthomas/log4go"
+	"io"
+	"os"
+	"strings"
 )
-
 
 type dbconfig struct {
 	Host     string
@@ -97,7 +96,7 @@ func (c PropertyReader) Read(key string) string {
 	return v
 }
 
-func init()  {
+func init() {
 	db := new(PropertyReader)
 	db.init("conf/mgox.properties")
 	log4go.Debug(db.m)

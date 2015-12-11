@@ -1,11 +1,10 @@
-
 // Created by yaoshuangxi
 
 package mgox
 
 import (
-	"gopkg.in/mgo.v2"
 	"github.com/alecthomas/log4go"
+	"gopkg.in/mgo.v2"
 )
 
 var dbSession *mgo.Session

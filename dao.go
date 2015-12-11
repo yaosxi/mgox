@@ -1,18 +1,17 @@
 package mgox
 
 import (
-	"errors"
-	"strings"
-	"reflect"
-	"gopkg.in/mgo.v2"
-	"gopkg.in/mgo.v2/bson"
-	"time"
-	"github.com/alecthomas/log4go"
-	"fmt"
 	"bytes"
 	"encoding/json"
+	"errors"
+	"fmt"
+	"github.com/alecthomas/log4go"
+	"gopkg.in/mgo.v2"
+	"gopkg.in/mgo.v2/bson"
+	"reflect"
+	"strings"
+	"time"
 )
-
 
 func getCollectionName(doc interface{}) string {
 	if collectionName, ok := doc.(string); ok {
@@ -55,7 +54,7 @@ type dao struct {
 	Err error
 }
 
-func Dao(configs... interface{}) *dao {
+func Dao(configs ...interface{}) *dao {
 	d := new(dao)
 	if len(configs) > 0 {
 		d.uid = configs[0]
@@ -63,7 +62,7 @@ func Dao(configs... interface{}) *dao {
 	return d
 }
 
-func (d *dao) Connect() (*dao) {
+func (d *dao) Connect() *dao {
 	if d.Err == nil {
 		d.db, d.Err = GetDatabase()
 	}
@@ -89,7 +88,7 @@ func (d *dao) WithConnectionContext(collectionName interface{}, fn func(c *mgo.C
 	return fn(d.db.C(getCollectionName(collectionName)))
 }
 
-func (d *dao) Insert(docs... interface{}) error {
+func (d *dao) Insert(docs ...interface{}) error {
 
 	if d.Err != nil {
 		return d.Err
@@ -133,7 +132,7 @@ func (d *dao) Insert(docs... interface{}) error {
 			}
 
 		} else if mType.Kind() == reflect.Map {
-			m, ok := docs[i].(bson.M);
+			m, ok := docs[i].(bson.M)
 			if !ok {
 				m, _ = docs[i].(map[string]interface{})
 			}
@@ -214,14 +213,14 @@ func (d *dao) Remove(collectionName interface{}, selector interface{}) error {
 	return d.Err
 }
 
-func (d *dao) isID(selectors... interface{}) bool {
+func (d *dao) isID(selectors ...interface{}) bool {
 	if len(selectors) != 1 {
 		return false
 	}
 	return !d.isM(selectors[0])
 }
 
-func (d * dao) isM(v interface{}) bool {
+func (d *dao) isM(v interface{}) bool {
 	if _, ok := v.(bson.M); ok {
 		return true
 	} else if _, ok := v.(map[string]interface{}); ok {
@@ -230,7 +229,7 @@ func (d * dao) isM(v interface{}) bool {
 	return false
 }
 
-func (d *dao) getM(values... interface{}) bson.M {
+func (d *dao) getM(values ...interface{}) bson.M {
 	m := bson.M{}
 	for i := 0; i < len(values); i++ {
 		if _m, ok := values[i].(bson.M); ok {
@@ -242,17 +241,17 @@ func (d *dao) getM(values... interface{}) bson.M {
 				m[key] = value
 			}
 		} else {
-			if i == len(values) - 1 {
+			if i == len(values)-1 {
 				break
 			}
-			m[values[i].(string)] = values[i + 1]
+			m[values[i].(string)] = values[i+1]
 			i++
 		}
 	}
 	return m
 }
 
-func (d *dao) update(operator string, collectionName interface{}, selector interface{}, updates... interface{}) error {
+func (d *dao) update(operator string, collectionName interface{}, selector interface{}, updates ...interface{}) error {
 
 	if d.Err != nil {
 		return d.Err
@@ -295,14 +294,14 @@ func (d *dao) update(operator string, collectionName interface{}, selector inter
 			if d.uid != nil {
 				m["lastmodifier"] = d.uid
 			}
-			update = bson.M{"$set": m, "$inc" : update}
+			update = bson.M{"$set": m, "$inc": update}
 		} else {
 			update["lastmodified"] = time.Now()
 			if d.uid != nil {
 				update["lastmodifier"] = d.uid
 			}
 			if operator != "update" {
-				update = bson.M{operator : update}
+				update = bson.M{operator: update}
 			}
 		}
 	}
@@ -362,23 +361,23 @@ func (d *dao) update(operator string, collectionName interface{}, selector inter
 	return d.Err
 }
 
-func (d *dao) Set(collectionName interface{}, selector interface{}, updates... interface{}) error {
+func (d *dao) Set(collectionName interface{}, selector interface{}, updates ...interface{}) error {
 	return d.update("$set", collectionName, selector, updates...)
 }
 
-func (d *dao) Inc(collectionName interface{}, selector interface{}, updates... interface{}) error {
+func (d *dao) Inc(collectionName interface{}, selector interface{}, updates ...interface{}) error {
 	return d.update("$inc", collectionName, selector, updates...)
 }
 
-func (d *dao) Push(collectionName interface{}, selector interface{}, updates... interface{}) error {
+func (d *dao) Push(collectionName interface{}, selector interface{}, updates ...interface{}) error {
 	return d.update("$push", collectionName, selector, updates...)
 }
 
-func (d *dao) Pull(collectionName interface{}, selector interface{}, updates... interface{}) error {
+func (d *dao) Pull(collectionName interface{}, selector interface{}, updates ...interface{}) error {
 	return d.update("$pull", collectionName, selector, updates...)
 }
 
-func (d *dao) Replace(collectionName interface{}, selector interface{}, updates... interface{}) error {
+func (d *dao) Replace(collectionName interface{}, selector interface{}, updates ...interface{}) error {
 	return d.update("update", collectionName, selector, updates...)
 }
 
@@ -396,14 +395,14 @@ type Query struct {
 	distinct   string
 }
 
-func (d *dao) Find(queries... interface{}) *Query {
+func (d *dao) Find(queries ...interface{}) *Query {
 	query := &Query{}
 	query.dao = d
 	query.queries = queries
 	return query
 }
 
-func (d *dao) Get(queries... interface{}) *Query {
+func (d *dao) Get(queries ...interface{}) *Query {
 	return d.Find(queries...)
 }
 
@@ -419,7 +418,7 @@ func (q *Query) Page(page *Page) *Query {
 	return q
 }
 
-func (q *Query) Sort(sorts... string) *Query {
+func (q *Query) Sort(sorts ...string) *Query {
 	q.sorts = sorts
 	return q
 }
@@ -563,7 +562,7 @@ func (q *Query) Count(collectionName interface{}) (int, error) {
 
 func (q *Query) First(result interface{}) error {
 	log4go.Debug("first")
-	q.page = &Page{Count:1}
+	q.page = &Page{Count: 1}
 	return q.Result(result)
 }
 
@@ -586,7 +585,7 @@ func (q *Query) Last(result interface{}) error {
 		count = 1
 	}
 	log4go.Debug("last")
-	q.page = &Page{Cursor: count - 1, Count:1}
+	q.page = &Page{Cursor: count - 1, Count: 1}
 	return q.Result(result)
 }
 
@@ -594,6 +593,3 @@ func (q *Query) Exist(collectionName interface{}) (bool, error) {
 	n, _ := q.Count(collectionName)
 	return n > 0, q.dao.Err
 }
-
-
-
