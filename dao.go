@@ -9,44 +9,8 @@ import (
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 	"reflect"
-	"strings"
 	"time"
 )
-
-func getCollectionName(doc interface{}) string {
-	if collectionName, ok := doc.(string); ok {
-		return collectionName
-	}
-	var collectionName string
-	mType := reflect.TypeOf(doc)
-	mValue := reflect.ValueOf(doc)
-	mType, mValue = getElem(mType, mValue)
-	if mType.Kind() == reflect.Struct && mValue.IsValid() {
-		field := mValue.FieldByName("CollectionName")
-		if field.IsValid() && field.String() != "" {
-			collectionName = field.String()
-		}
-	}
-	if collectionName == "" && mType.Name() != "" {
-		collectionName = strings.ToLower(mType.Name())
-	}
-	return collectionName
-}
-
-func GetObjectId(doc interface{}) bson.ObjectId {
-	mType := reflect.TypeOf(doc)
-	mValue := reflect.ValueOf(doc)
-	mType, mValue = getElem(mType, mValue)
-	if mType.Kind() == reflect.Struct && mValue.IsValid() {
-		field := mValue.FieldByName("Id")
-		if field.IsValid() && field.Interface() != nil {
-			if v, ok := field.Interface().(bson.ObjectId); ok {
-				return v
-			}
-		}
-	}
-	return ""
-}
 
 type dao struct {
 	db  *mgo.Database
@@ -75,17 +39,6 @@ func (d *dao) Close() {
 		d.db = nil
 		log4go.Debug("Closed DB connection succssfully")
 	}
-}
-
-func (d *dao) WithConnectionContext(collectionName interface{}, fn func(c *mgo.Collection) error) error {
-	if d.db == nil {
-		d.Connect()
-		if d.Err != nil {
-			return d.Err
-		}
-		defer d.Close()
-	}
-	return fn(d.db.C(getCollectionName(collectionName)))
 }
 
 func (d *dao) Insert(docs ...interface{}) error {
@@ -382,7 +335,7 @@ func (d *dao) Replace(collectionName interface{}, selector interface{}, updates 
 }
 
 func (d *dao) ReplaceDoc(doc interface{}) error {
-	return d.update("update", doc, GetObjectId(doc), doc)
+	return d.update("update", doc, getObjectId(doc), doc)
 }
 
 type Query struct {
