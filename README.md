@@ -3,8 +3,6 @@
 
 mgox is a friendly wapper of [mgo](http://gopkg.in/mgo.v2).
 
-More info [beego.me](http://beego.me)
-
 ## Installation
 
     go get github.com/yaosxi/mgox
