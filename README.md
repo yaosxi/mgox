@@ -17,9 +17,7 @@ mgox is a friendly wapper of [mgo](http://gopkg.in/mgo.v2).
 
 ## Example
 
-Please refer to [dao test](blob/master/dao_test.go)
-
-
+Please refer to [dao_test.go](dao_test.go)
 
 ## LICENSE
 
