@@ -5,9 +5,9 @@
 package mgox
 
 import (
+	"gopkg.in/mgo.v2/bson"
 	"reflect"
 	"strings"
-	"gopkg.in/mgo.v2/bson"
 )
 
 func getCollectionName(doc interface{}) string {

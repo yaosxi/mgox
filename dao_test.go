@@ -39,11 +39,11 @@ func getFirst() User {
 func TestConnection(t *testing.T) {
 	dao := mgox.Dao().Connect()
 	defer dao.Close()
-	var user User
-	dao.Find().IgnoreNFE().First(&user)
+	var user = new(User)
+	dao.Find().IgnoreNFE().First(user)
 	log4go.Debug(user.Id)
-	dao.Find().IgnoreNFE().First(&user)
-	err := dao.Find().IgnoreNFE().First(&user)
+	dao.Find().IgnoreNFE().First(user)
+	err := dao.Find().IgnoreNFE().First(user)
 	if handleError(t, err) {
 		return
 	}
