@@ -27,7 +27,7 @@ func GetDatabase() (*mgo.Database, error) {
 	if DBConfig.Username != "" {
 		loginErr := database.Login(DBConfig.Username, DBConfig.Password)
 		if loginErr != nil {
-			return database, nil
+			return nil, loginErr
 		}
 	}
 
