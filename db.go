@@ -18,7 +18,7 @@ func GetDatabase() (*mgo.Database, error) {
 		if err != nil {
 			return nil, err
 		}
-		dbSession.SetMode(mgo.Strong, true)
+		dbSession.SetMode(mgo.Monotonic, true)
 	}
 
 	log4go.Finest("Try to open DB connnection: %s", DBConfig.Database)
