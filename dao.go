@@ -242,17 +242,20 @@ func (d *dao) update(operator string, collectionName interface{}, selector inter
 
 		update = d.getM(updates...)
 
-		if operator == "$inc" {
+		if operator == "$inc" || operator == "$push" {
 			m := bson.M{"lastmodified": time.Now()}
 			if d.uid != nil {
 				m["lastmodifier"] = d.uid
 			}
-			update = bson.M{"$set": m, "$inc": update}
+			update = bson.M{"$set": m, operator: update}
 		} else {
-			update["lastmodified"] = time.Now()
-			if d.uid != nil {
-				update["lastmodifier"] = d.uid
+			if operator == "$set" || operator == "$update" {
+				update["lastmodified"] = time.Now()
+				if d.uid != nil {
+					update["lastmodifier"] = d.uid
+				}
 			}
+
 			if operator != "update" {
 				update = bson.M{operator: update}
 			}
