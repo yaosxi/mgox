@@ -2,7 +2,7 @@ package mgox
 
 import (
 	"bufio"
-	"github.com/alecthomas/log4go"
+	"github.com/kimiazhu/log4go"
 	"io"
 	"os"
 	"strings"

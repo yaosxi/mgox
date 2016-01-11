@@ -1,7 +1,7 @@
 package mgox_test
 
 import (
-	"github.com/alecthomas/log4go"
+	"github.com/kimiazhu/log4go"
 	"github.com/yaosxi/mgox"
 	"gopkg.in/mgo.v2/bson"
 	"testing"

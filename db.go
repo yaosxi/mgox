@@ -3,7 +3,7 @@
 package mgox
 
 import (
-	"github.com/alecthomas/log4go"
+	"github.com/kimiazhu/log4go"
 	"gopkg.in/mgo.v2"
 )
 
