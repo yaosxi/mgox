@@ -75,11 +75,11 @@ func (d *dao) Insert(docs ...interface{}) error {
 
 
 
-
 			// This will force mongo db store localcreated field in a local time , not UTC time.
 			field = mValue.FieldByName("LocalCreated")
 			if field.CanSet() {
 				_,offset:=time.Now().Local().Zone()
+//				zoneName,offset:=time.Now().Local().Zone()
 //				println("zone name is:%s,offset is:%d",zoneName,offset)
 				newtime:= time.Now().Add(time.Duration(offset*1000000000))
 //				fmt.Println("newtime:",newtime)
