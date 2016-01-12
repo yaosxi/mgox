@@ -1,11 +1,10 @@
-
 // Created by yaoshuangxi
 
 package mgox
 
 import (
+	"github.com/kimiazhu/log4go"
 	"gopkg.in/mgo.v2"
-	"github.com/alecthomas/log4go"
 )
 
 var dbSession *mgo.Session
@@ -19,7 +18,7 @@ func GetDatabase() (*mgo.Database, error) {
 		if err != nil {
 			return nil, err
 		}
-		dbSession.SetMode(mgo.Strong, true)
+		dbSession.SetMode(mgo.Monotonic, true)
 	}
 
 	log4go.Finest("Try to open DB connnection: %s", DBConfig.Database)
@@ -28,7 +27,7 @@ func GetDatabase() (*mgo.Database, error) {
 	if DBConfig.Username != "" {
 		loginErr := database.Login(DBConfig.Username, DBConfig.Password)
 		if loginErr != nil {
-			return database, nil
+			return nil, loginErr
 		}
 	}
 

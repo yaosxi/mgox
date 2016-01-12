@@ -1,11 +1,11 @@
 package mgox_test
 
 import (
+	"github.com/kimiazhu/log4go"
+	"github.com/yaosxi/mgox"
 	"gopkg.in/mgo.v2/bson"
 	"testing"
-	"github.com/yaosxi/mgox"
 	"time"
-	"github.com/alecthomas/log4go"
 )
 
 func handleError(t *testing.T, err error) bool {
@@ -18,15 +18,16 @@ func handleError(t *testing.T, err error) bool {
 }
 
 var UserCollectionName = new(User)
+
 type User struct {
-	Id           bson.ObjectId              `json:"id" bson:"_id,omitempty"`
-	Name         string                     `json:"name"`
-	Age          int                        `json:"age"`
-	Sex          int                        `json:"sex"`
-	FirstCreator string                     `json:"firstcreator"`
-	FirstCreated time.Time                  `json:"firstcreated"`
-	LastModifier string                     `json:"lastmodifier"`
-	LastModified time.Time                  `json:"lastmodified"`
+	Id           bson.ObjectId `json:"id" bson:"_id,omitempty"`
+	Name         string        `json:"name"`
+	Age          int           `json:"age"`
+	Sex          int           `json:"sex"`
+	FirstCreator string        `json:"firstcreator"`
+	FirstCreated time.Time     `json:"firstcreated"`
+	LastModifier string        `json:"lastmodifier"`
+	LastModified time.Time     `json:"lastmodified"`
 }
 
 func getFirst() User {
@@ -38,11 +39,11 @@ func getFirst() User {
 func TestConnection(t *testing.T) {
 	dao := mgox.Dao().Connect()
 	defer dao.Close()
-	var user User
-	dao.Find().IgnoreNFE().First(&user)
+	var user = new(User)
+	dao.Find().IgnoreNFE().First(user)
 	log4go.Debug(user.Id)
-	dao.Find().IgnoreNFE().First(&user)
-	err := dao.Find().IgnoreNFE().First(&user)
+	dao.Find().IgnoreNFE().First(user)
+	err := dao.Find().IgnoreNFE().First(user)
 	if handleError(t, err) {
 		return
 	}
@@ -50,16 +51,16 @@ func TestConnection(t *testing.T) {
 
 func TestInsert(t *testing.T) {
 	err := mgox.Dao("111111").Insert(
-		&User{Name : "yaosxi", Age : 2, Sex :1},
-		&User{Name : "yaosxi2", Age : 3, Sex :1},
-		bson.M{"name": "yaosxi3", "age" : 3, "sex" :1},
+		&User{Name: "yaosxi", Age: 2, Sex: 1},
+		&User{Name: "yaosxi2", Age: 3, Sex: 1},
+		bson.M{"name": "yaosxi3", "age": 3, "sex": 1},
 	)
 	if handleError(t, err) {
 		return
 	}
 
 	err = mgox.Dao("111111").Insert(
-		User{Name : "yaosxi4", Age : 2, Sex :1},
+		User{Name: "yaosxi4", Age: 2, Sex: 1},
 	)
 	if handleError(t, err) {
 		return
@@ -85,7 +86,6 @@ func TestRemove(t *testing.T) {
 		return
 	}
 }
-
 
 func TestSet(t *testing.T) {
 
@@ -142,7 +142,7 @@ func TestInc(t *testing.T) {
 	}
 	age := user.Age
 	user = getFirst()
-	if user.Age != age + 1 {
+	if user.Age != age+1 {
 		t.Fail()
 	}
 }
@@ -159,7 +159,7 @@ func TestReplace(t *testing.T) {
 		t.Fail()
 		return
 	}
-	err = mgox.Dao().ReplaceDoc(User{Id:user.Id, Name : "carson2"})
+	err = mgox.Dao().ReplaceDoc(User{Id: user.Id, Name: "carson2"})
 	if handleError(t, err) {
 		return
 	}
@@ -238,7 +238,6 @@ func TestFind(t *testing.T) {
 	}
 	log4go.Debug(user)
 }
-
 
 func TestGet(t *testing.T) {
 
